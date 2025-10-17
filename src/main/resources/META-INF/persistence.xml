@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<persistence xmlns="https://jakarta.ee/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_2.xsd"
+             version="3.0">
+    <persistence-unit name="ecommercePU" transaction-type="RESOURCE_LOCAL" >
+        <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+        <class>ma.fstt.atelierecommerce.Model.User</class>
+        <class>ma.fstt.atelierecommerce.Model.LignePanier</class>
+        <class>ma.fstt.atelierecommerce.Model.Panier</class>
+        <class>ma.fstt.atelierecommerce.Model.Produit</class>
+        <class>ma.fstt.atelierecommerce.Model.Commande</class>
+        <class>ma.fstt.atelierecommerce.Model.LigneCommande</class>
+
+        <properties>
+            <!-- Connexion JDBC directe -->
+            <property name="jakarta.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:mysql://127.0.0.1:3306/ecommerce_db_2"/>
+            <property name="jakarta.persistence.jdbc.user" value="root"/>
+            <property name="jakarta.persistence.jdbc.password" value=""/> <!-- Ajuste si ton MySQL a un mot de passe -->
+
+            <!-- EclipseLink DDL Generation -->
+            <property name="eclipselink.ddl-generation" value="create-or-extend-tables"/>
+            <property name="eclipselink.ddl-generation.output-mode" value="both"/>
+            <property name="eclipselink.create-ddl-jdbc-file-name" value="create.sql"/>
+            <property name="eclipselink.drop-ddl-jdbc-file-name" value="drop.sql"/>
+
+            <!-- SQL Logging -->
+            <property name="eclipselink.logging.level" value="FINE"/>
+            <property name="eclipselink.logging.level.sql" value="ALL"/>
+            <property name="eclipselink.logging.parameters" value="true"/>
+            <property name="eclipselink.logging.logger" value="DefaultLogger"/>
+        </properties>
+    </persistence-unit>
+</persistence>
