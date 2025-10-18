@@ -33,7 +33,7 @@ public class PanierServlet extends HttpServlet {
         try {
             if (action != null && user != null) {
                 System.out.println("Panier action: " + action);
-                Panier panier = user.getPanier(); // Déclaration unique en dehors du switch
+                Panier panier = user.getPanier();
                 switch (action) {
                     case "view":
                         if (panier != null) {
@@ -76,7 +76,7 @@ public class PanierServlet extends HttpServlet {
                                 } else {
                                     em.getTransaction().begin();
                                     try {
-                                        // Mettre à jour le stock du produit
+                                        // mettre a jour le stock du produit
                                         Produit produit = ligne.getProduit();
                                         if (produit != null) {
                                             produit.setStock(produit.getStock() + ligne.getQuantite());
@@ -95,7 +95,7 @@ public class PanierServlet extends HttpServlet {
                                                 .setParameter("panier", panier)
                                                 .getSingleResult();
                                         panier.setTotal(newTotal);
-                                        // Pas besoin de merge ou find, le panier est déjà managé
+
 
                                         em.getTransaction().commit();
                                         request.setAttribute("message", "Ligne supprimée du panier !");
@@ -136,21 +136,21 @@ public class PanierServlet extends HttpServlet {
                         if (panier != null) {
                             em.getTransaction().begin();
                             try {
-                                // Récupérer les lignes avant de créer la commande
+                                // recuperer les lignes avant de creer la commande
                                 List<LignePanier> lignes = em.createQuery(
                                                 "SELECT l FROM LignePanier l WHERE l.panier = :panier", LignePanier.class)
                                         .setParameter("panier", panier)
                                         .getResultList();
 
-                                // Vérifier que le panier n'est pas vide
+                                // verifier si le penier n est pas vide
                                 if (lignes.isEmpty()) {
                                     request.setAttribute("error", "Le panier est vide !");
                                     request.getRequestDispatcher("/WEB-INF/views/panier.jsp").forward(request, response);
                                     return;
                                 }
 
-                                // Créer la commande
-                                Commande commande = new Commande(new Date(), 0.0, user);
+                                // creation de la commande
+                                Commande commande = new Commande(new Date(), 0.0, user,"en attente");
                                 em.persist(commande);
 
                                 double totalCommande = 0.0;
@@ -164,29 +164,28 @@ public class PanierServlet extends HttpServlet {
                                         return;
                                     }
 
-                                    // Créer la ligne de commande
+                                    // creation de ligne de commande
                                     LigneCommande ligneCommande = new LigneCommande(ligne.getQuantite(), commande, produit);
                                     em.persist(ligneCommande);
                                     commande.getLignes().add(ligneCommande);
 
-                                    // Décrémenter le stock
+                                    // decrementer le stock
                                     produit.setStock(produit.getStock() - ligne.getQuantite());
                                     em.merge(produit);
 
                                     totalCommande += ligne.getQuantite() * produit.getPrix_produit();
                                 }
 
-                                // Mettre à jour le total de la commande
+                                // mettre a jour le total de la commande
                                 commande.setTotal(totalCommande);
                                 em.merge(commande);
 
-                                // Vider le panier
+                                // vider le panier
                                 em.createQuery("DELETE FROM LignePanier l WHERE l.panier = :panier")
                                         .setParameter("panier", panier)
                                         .executeUpdate();
 
                                 panier.setTotal(0.0);
-                                // Pas besoin de merge, panier est déjà managé
 
                                 em.getTransaction().commit();
                                 request.setAttribute("message", "Commande validée avec succès ! Total : " + totalCommande + " DH");

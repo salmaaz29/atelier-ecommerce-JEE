@@ -24,6 +24,9 @@ public class Commande {
     @Column
     private double total; // Total de la commande, calculé à partir des lignes
 
+    @Column
+    private String statut; // Ex: "En attente", "Livrée"
+
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
@@ -31,8 +34,9 @@ public class Commande {
     @OneToMany(mappedBy = "commande", cascade = CascadeType.ALL)
     private List<LigneCommande> lignes;
 
-    public Commande(Date dateCommande, double total, User user) {
+    public Commande(Date dateCommande, double total, User user,String statut) {
         this.dateCommande = dateCommande;
+        this.statut = statut;
         this.total = total;
         this.user = user;
     }

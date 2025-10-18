@@ -417,7 +417,7 @@
                                 <td>
                                     <c:choose>
                                         <c:when test="${not empty produit.image_produit}">
-                                            <img src="${produit.image_produit}" alt="${produit.nom_produit}" class="product-image" onerror="this.style.display='none'">
+                                            <img src="${pageContext.request.contextPath}/${produit.image_produit}" alt="${produit.nom_produit}" class="product-image" onerror="this.style.display='none'">
                                         </c:when>
                                         <c:otherwise>
                                             <div style="width:60px;height:60px;background:#f1f5f9;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#94a3b8;">

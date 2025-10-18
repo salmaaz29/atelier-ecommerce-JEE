@@ -600,6 +600,13 @@
                         </svg>
                         Continuer mes achats
                     </a>
+                    <a href="${pageContext.request.contextPath}/commande?action=list" class="btn-continue">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="19" y1="12" x2="5" y2="12"></line>
+                            <polyline points="12 19 5 12 12 5"></polyline>
+                        </svg>
+                        Voir mes commndes
+                    </a>
                 </div>
             </div>
         </c:when>
@@ -616,6 +623,13 @@
                         <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
                     </svg>
                     Découvrir nos produits
+                </a>
+                <a href="${pageContext.request.contextPath}/commande?action=list" class="btn-continue">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                    Voir mes commndes
                 </a>
             </div>
         </c:otherwise>
