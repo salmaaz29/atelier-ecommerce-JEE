@@ -715,10 +715,10 @@
         <p>Découvrez une expérience shopping révolutionnaire avec ShopMaroc. Des produits premium, un service exceptionnel et des avantages exclusifs vous attendent.</p>
         <div class="hero-buttons">
             <a href="<%= request.getContextPath() %>/user?action=register" class="hero-btn hero-btn-white">
-                🚀 Commencer l'aventure
+                 Commencer l'aventure
             </a>
             <a href="#features" class="hero-btn hero-btn-outline">
-                ✨ Découvrir les avantages
+                 Découvrir les avantages
             </a>
         </div>
     </div>
@@ -814,7 +814,7 @@
         <h2>Prêt à Transformer Votre Expérience Shopping ?</h2>
         <p>Rejoignez notre communauté exclusive et accédez à un univers de produits premium, d'offres spéciales et d'un service personnalisé.</p>
         <a href="<%= request.getContextPath() %>/user?action=register" class="hero-btn hero-btn-white">
-            💫 Créer mon compte gratuit
+             Créer mon compte gratuit
         </a>
     </div>
 </section>
@@ -855,7 +855,7 @@
         </div>
     </div>
     <div class="footer-bottom">
-        <p>&copy; 2025 ShopMaroc. Tous droits réservés. | Fait avec ❤️ par Saly</p>
+        <p>&copy; 2025 ShopMaroc. Tous droits réservés.</p>
     </div>
 </footer>
 </body>

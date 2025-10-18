@@ -1,27 +1,379 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-    <title>Modifier un utilisateur</title>
+    <title>Modifier un utilisateur - Administration</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --accent: #f093fb;
+            --dark: #2d3748;
+            --light: #f8fafc;
+            --success: #48bb78;
+            --danger: #e53e3e;
+            --warning: #ed8936;
+            --text: #2d3748;
+            --text-light: #718096;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .admin-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .admin-header {
+            background: linear-gradient(135deg, var(--warning) 0%, #ed8936 100%);
+            color: white;
+            padding: 2.5rem;
+            text-align: center;
+        }
+
+        .admin-header h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .admin-header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .admin-content {
+            padding: 2.5rem;
+        }
+
+        /* Messages */
+        .alert {
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            font-weight: 500;
+            animation: slideInDown 0.5s ease;
+        }
+
+        .alert-error {
+            background: #fed7d7;
+            color: #c53030;
+            border: 2px solid #feb2b2;
+        }
+
+        /* User Info Header */
+        .user-header {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: var(--light);
+            border-radius: 12px;
+            border-left: 4px solid var(--warning);
+        }
+
+        .user-avatar-large {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--warning) 0%, #ed8936 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 2rem;
+            box-shadow: 0 8px 25px rgba(237, 137, 54, 0.3);
+        }
+
+        .user-info-large h3 {
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+
+        .user-info-large p {
+            color: var(--text-light);
+            margin-bottom: 0.3rem;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 1.8rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.7rem;
+            color: var(--text);
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 1rem 1.2rem;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: var(--light);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--warning);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(237, 137, 54, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-light);
+        }
+
+        .password-note {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Button Styles */
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, var(--warning) 0%, #ed8936 100%);
+            color: white;
+            box-shadow: 0 8px 25px rgba(237, 137, 54, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--light);
+            color: var(--text);
+            border: 2px solid var(--border);
+        }
+
+        .btn-warning:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(237, 137, 54, 0.4);
+        }
+
+        .btn-secondary:hover {
+            background: white;
+            border-color: var(--warning);
+            transform: translateY(-2px);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2.5rem;
+            flex-wrap: wrap;
+        }
+
+        /* Navigation */
+        .admin-nav {
+            background: var(--light);
+            padding: 1.5rem 2.5rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .nav-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-link:hover {
+            color: var(--secondary);
+            transform: translateX(5px);
+        }
+
+        /* Animations */
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .admin-header {
+                padding: 2rem 1.5rem;
+            }
+
+            .admin-header h1 {
+                font-size: 1.8rem;
+            }
+
+            .admin-content {
+                padding: 2rem 1.5rem;
+            }
+
+            .user-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .admin-nav {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .admin-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .admin-header p {
+                font-size: 1rem;
+            }
+
+            .form-input {
+                padding: 0.8rem 1rem;
+            }
+
+            .user-avatar-large {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
+        }
+    </style>
 </head>
 <body>
-<h1>Modifier un utilisateur</h1>
-<c:if test="${not empty error}">
-    <p style="color:red">${error}</p>
-</c:if>
-<form action="${pageContext.request.contextPath}/admin/user/edit" method="post">
-    <input type="hidden" name="id" value="${user.id_user}">
-    <label>Nom :</label><br>
-    <input type="text" name="nom" value="${user.nom}" required><br>
-    <label>Email :</label><br>
-    <input type="email" name="email" value="${user.email}" required><br>
-    <label>Mot de passe :</label><br>
-    <input type="password" name="motdepasse" value="${user.motdepasse}" required><br>
-    <label>Adresse :</label><br>
-    <input type="text" name="adresse" value="${user.adresse}" required><br>
-    <input type="submit" value="Modifier">
-</form>
-<a href="${pageContext.request.contextPath}/admin/user/list">Retour à la liste</a>
+<div class="admin-container">
+    <div class="admin-header">
+        <h1> Modifier l'Utilisateur</h1>
+        <p>Mettez à jour les informations de l'utilisateur</p>
+    </div>
+
+    <div class="admin-content">
+        <c:if test="${not empty error}">
+            <div class="alert alert-error">
+                ⚠️ ${error}
+            </div>
+        </c:if>
+
+        <div class="user-header">
+            <div class="user-avatar-large">
+                ${user.nom.charAt(0)}
+            </div>
+            <div class="user-info-large">
+                <h3>${user.nom}</h3>
+                <p> ${user.email}</p>
+                <p> ID: #${user.id_user}</p>
+            </div>
+        </div>
+
+        <form action="${pageContext.request.contextPath}/admin/user/edit" method="post">
+            <input type="hidden" name="id" value="${user.id_user}">
+
+            <div class="form-group">
+                <label class="form-label">👤 Nom complet</label>
+                <input type="text" name="nom" class="form-input" value="${user.nom}" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label"> Adresse email</label>
+                <input type="email" name="email" class="form-input" value="${user.email}" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label"> Mot de passe</label>
+                <input type="password" name="motdepasse" class="form-input" value="${user.motdepasse}" required>
+                <div class="password-note">
+                    🔐 Laissez le mot de passe actuel ou saisissez un nouveau mot de passe
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label"> Adresse</label>
+                <input type="text" name="adresse" class="form-input" value="${user.adresse}" required>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-warning">
+                     Enregistrer les modifications
+                </button>
+                <a href="${pageContext.request.contextPath}/admin/user/list" class="btn btn-secondary">
+                     Annuler
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <div class="admin-nav">
+        <a href="${pageContext.request.contextPath}/admin/user/list" class="nav-link">
+             Liste des utilisateurs
+        </a>
+        <a href="${pageContext.request.contextPath}/user?action=logout" class="nav-link">
+             Déconnexion
+        </a>
+    </div>
+</div>
 </body>
 </html>
