@@ -20,13 +20,6 @@ Application web de commerce électronique développée avec Jakarta EE, architec
 - **Gestion des produits** : Ajout, modification, suppression avec gestion du stock
 - **Gestion des commandes** : Suivi et mise à jour du statut (En attente → Confirmée → Expédiée → Livrée)
 
-## 🔧 Technologies
-
-- **Backend** : Jakarta EE (Servlets, JSP), JPA/EclipseLink
-- **Base de données** : MySQL 8.x
-- **Build** : Maven 3.x
-- **Serveur** : Apache Tomcat 10.x
-- **Frontend** : HTML, CSS, JavaScript, JSTL
 
 ## 🏗️ Architecture
 
@@ -45,20 +38,12 @@ User ──1:1── Panier ──1:N── LignePanier ──N:1── Produit
 - **Commande** : Commandes validées (id, date, total, statut)
 - **LigneCommande** : Détails commande (id, quantité, produit)
 
-## 📥 Installation
-
-### Prérequis
-- JDK 17+
-- MySQL 8.x
-- Apache Tomcat 10.x
-- Maven 3.x
-
 ### Configuration
 
 **1. Cloner le projet**
 ```bash
-git clone https://github.com/votre-username/atelier-ecommerce.git
-cd atelier-ecommerce
+git clone https://github.com/salmaaz29/atelier-ecommerce-JEE.git
+atelier-ecommerce-JEE
 ```
 
 **2. Créer la base de données**
@@ -78,18 +63,13 @@ Modifier `src/main/resources/META-INF/persistence.xml` :
 **4. Générer les tables**
 ```bash
 # Exécuter MainTest.java pour créer automatiquement les tables
-mvn exec:java -Dexec.mainClass="ma.fstt.atelierecommerce.Model.MainTest"
+mvn exec:java -Dexec.mainClass="ma.fstt.atelierecommerce.utils.MainTest"
 ```
 
 **5. Compiler et déployer**
 ```bash
 mvn clean package
 # Copier le fichier .war dans le dossier webapps/ de Tomcat
-```
-
-**6. Lancer l'application**
-```
-http://localhost:8080/atelierecommerce
 ```
 
 ## 📁 Structure du Projet
