@@ -26,7 +26,7 @@ public class Panier {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToMany(mappedBy = "panier", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "panier", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<LignePanier> lignes;
 
     public Panier(Date datecreation, Double total, User user) {

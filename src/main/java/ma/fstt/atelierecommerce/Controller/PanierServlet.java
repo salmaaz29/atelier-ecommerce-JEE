@@ -33,9 +33,9 @@ public class PanierServlet extends HttpServlet {
         try {
             if (action != null && user != null) {
                 System.out.println("Panier action: " + action);
+                Panier panier = user.getPanier(); // Déclaration unique en dehors du switch
                 switch (action) {
                     case "view":
-                        Panier panier = user.getPanier();
                         if (panier != null) {
                             List<LignePanier> lignes = em.createQuery(
                                             "SELECT l FROM LignePanier l WHERE l.panier = :panier", LignePanier.class)
@@ -43,10 +43,10 @@ public class PanierServlet extends HttpServlet {
                                     .getResultList();
                             request.setAttribute("lignes", lignes);
                             Double total = em.createQuery(
-                                            "SELECT SUM(l.quantite * p.prix_produit) FROM LignePanier l JOIN l.produit p WHERE l.panier = :panier", Double.class)
+                                            "SELECT COALESCE(SUM(l.quantite * p.prix_produit), 0) FROM LignePanier l JOIN l.produit p WHERE l.panier = :panier", Double.class)
                                     .setParameter("panier", panier)
                                     .getSingleResult();
-                            request.setAttribute("total", total != null ? total : 0.0);
+                            request.setAttribute("total", total);
                         } else {
                             request.setAttribute("lignes", new java.util.ArrayList<>());
                             request.setAttribute("total", 0.0);
@@ -54,45 +54,62 @@ public class PanierServlet extends HttpServlet {
                         request.getRequestDispatcher("/WEB-INF/views/panier.jsp").forward(request, response);
                         return;
                     case "removeLine":
-                        Long ligneId = Long.parseLong(request.getParameter("ligneId"));
-                        LignePanier ligne = em.find(LignePanier.class, ligneId);
-                        if (ligne != null && ligne.getPanier().getUser().equals(user)) {
-                            em.getTransaction().begin();
-                            try {
-                                Produit produit = ligne.getProduit();
-                                produit.setStock(produit.getStock() + ligne.getQuantite());
-                                em.merge(produit);
-                                em.remove(ligne);
-                                Panier panierrem = user.getPanier();
-                                Double newTotal = em.createQuery(
-                                                "SELECT SUM(l.quantite * p.prix_produit) FROM LignePanier l JOIN l.produit p WHERE l.panier = :panier", Double.class)
-                                        .setParameter("panier", panierrem)
-                                        .getSingleResult();
-                                panierrem.setTotal(newTotal != null ? newTotal : 0.0);
-                                em.merge(panierrem);
-                                em.getTransaction().commit();
-                                request.setAttribute("message", "Ligne supprimée du panier !");
-                            } catch (Exception e) {
-                                em.getTransaction().rollback();
-                                request.setAttribute("error", "Erreur lors de la suppression : " + e.getMessage());
-                                e.printStackTrace();
+                        try {
+                            Long ligneId = Long.parseLong(request.getParameter("ligneId"));
+                            System.out.println("Tentative de suppression de ligne avec ID: " + ligneId);
+                            LignePanier ligne = em.find(LignePanier.class, ligneId);
+
+                            if (ligne == null) {
+                                request.setAttribute("error", "Ligne avec ID " + ligneId + " non trouvée.");
+                            } else if (panier == null) {
+                                request.setAttribute("error", "Panier de l'utilisateur introuvable.");
+                            } else {
+                                User ligneUser = ligne.getPanier().getUser();
+                                System.out.println("Utilisateur connecté (ID/Email): " + (user != null ? user.getId_user() + "/" + user.getEmail() : "null") +
+                                        ", Utilisateur de la ligne (ID/Email): " + (ligneUser != null ? ligneUser.getId_user() + "/" + ligneUser.getEmail() : "null"));
+
+                                if (ligne.getPanier() == null || ligneUser == null) {
+                                    request.setAttribute("error", "Relation panier ou utilisateur invalide pour la ligne.");
+                                } else if (!ligneUser.getEmail().equals(user.getEmail())) {
+                                    request.setAttribute("error", "L'utilisateur connecté (" + user.getEmail() +
+                                            ") ne correspond pas au propriétaire de la ligne (" + ligneUser.getEmail() + ").");
+                                } else {
+                                    em.getTransaction().begin();
+                                    try {
+                                        // Mettre à jour le stock du produit
+                                        Produit produit = ligne.getProduit();
+                                        if (produit != null) {
+                                            produit.setStock(produit.getStock() + ligne.getQuantite());
+                                            em.merge(produit);
+                                        }
+
+                                        // Supprimer la ligne
+                                        em.remove(ligne);
+                                        em.flush(); // Forcer la synchronisation
+
+                                        System.out.println("Ligne supprimée avec ID: " + ligneId);
+
+                                        // Mettre à jour le total du panier (panier est déjà managé)
+                                        Double newTotal = em.createQuery(
+                                                        "SELECT COALESCE(SUM(l.quantite * p.prix_produit), 0) FROM LignePanier l JOIN l.produit p WHERE l.panier = :panier", Double.class)
+                                                .setParameter("panier", panier)
+                                                .getSingleResult();
+                                        panier.setTotal(newTotal);
+                                        // Pas besoin de merge ou find, le panier est déjà managé
+
+                                        em.getTransaction().commit();
+                                        request.setAttribute("message", "Ligne supprimée du panier !");
+                                    } catch (Exception e) {
+                                        em.getTransaction().rollback();
+                                        request.setAttribute("error", "Erreur lors de la suppression : " + e.getMessage());
+                                        e.printStackTrace();
+                                    }
+                                }
                             }
+                        } catch (NumberFormatException e) {
+                            request.setAttribute("error", "ID de ligne invalide : " + e.getMessage());
+                            e.printStackTrace();
                         }
-                        List<LignePanier> lignes = em.createQuery(
-                                        "SELECT l FROM LignePanier l WHERE l.panier = :panier", LignePanier.class)
-                                .setParameter("panier", user.getPanier())
-                                .getResultList();
-                        request.setAttribute("lignes", lignes);
-                        Double total = em.createQuery(
-                                        "SELECT SUM(l.quantite * p.prix_produit) FROM LignePanier l JOIN l.produit p WHERE l.panier = :panier", Double.class)
-                                .setParameter("panier", user.getPanier())
-                                .getSingleResult();
-                        request.setAttribute("total", total != null ? total : 0.0);
-                        request.getRequestDispatcher("/WEB-INF/views/panier.jsp").forward(request, response);
-                        return;
-                    default:
-                        System.out.println("Unknown panier action: " + action);
-                        break;
                 }
             }
             response.sendRedirect(request.getContextPath() + "/produit?action=list");
@@ -119,38 +136,60 @@ public class PanierServlet extends HttpServlet {
                         if (panier != null) {
                             em.getTransaction().begin();
                             try {
-                                Commande commande = new Commande(new Date(), 0.0, user);
-                                em.persist(commande);
-
+                                // Récupérer les lignes avant de créer la commande
                                 List<LignePanier> lignes = em.createQuery(
                                                 "SELECT l FROM LignePanier l WHERE l.panier = :panier", LignePanier.class)
                                         .setParameter("panier", panier)
                                         .getResultList();
+
+                                // Vérifier que le panier n'est pas vide
+                                if (lignes.isEmpty()) {
+                                    request.setAttribute("error", "Le panier est vide !");
+                                    request.getRequestDispatcher("/WEB-INF/views/panier.jsp").forward(request, response);
+                                    return;
+                                }
+
+                                // Créer la commande
+                                Commande commande = new Commande(new Date(), 0.0, user);
+                                em.persist(commande);
+
                                 double totalCommande = 0.0;
                                 for (LignePanier ligne : lignes) {
-                                    LigneCommande ligneCommande = new LigneCommande(ligne.getQuantite(), commande, ligne.getProduit());
+                                    // Vérifier le stock disponible
+                                    Produit produit = ligne.getProduit();
+                                    if (produit.getStock() < ligne.getQuantite()) {
+                                        em.getTransaction().rollback();
+                                        request.setAttribute("error", "Stock insuffisant pour le produit : " + produit.getNom_produit());
+                                        request.getRequestDispatcher("/WEB-INF/views/panier.jsp").forward(request, response);
+                                        return;
+                                    }
+
+                                    // Créer la ligne de commande
+                                    LigneCommande ligneCommande = new LigneCommande(ligne.getQuantite(), commande, produit);
                                     em.persist(ligneCommande);
                                     commande.getLignes().add(ligneCommande);
 
-                                    Produit produit = ligne.getProduit();
+                                    // Décrémenter le stock
                                     produit.setStock(produit.getStock() - ligne.getQuantite());
                                     em.merge(produit);
 
                                     totalCommande += ligne.getQuantite() * produit.getPrix_produit();
                                 }
+
+                                // Mettre à jour le total de la commande
                                 commande.setTotal(totalCommande);
                                 em.merge(commande);
 
-                                // Supprimer uniquement les LignePanier
+                                // Vider le panier
                                 em.createQuery("DELETE FROM LignePanier l WHERE l.panier = :panier")
                                         .setParameter("panier", panier)
                                         .executeUpdate();
-                                // Ne pas réinitialiser le total à 0 si tu veux le conserver
-                                // panier.setTotal(0.0);
-                                // em.merge(panier);
+
+                                panier.setTotal(0.0);
+                                // Pas besoin de merge, panier est déjà managé
 
                                 em.getTransaction().commit();
-                                request.setAttribute("message", "Commande validée avec succès !");
+                                request.setAttribute("message", "Commande validée avec succès ! Total : " + totalCommande + " DH");
                             } catch (Exception e) {
                                 em.getTransaction().rollback();
                                 request.setAttribute("error", "Erreur lors de la validation : " + e.getMessage());
@@ -161,9 +200,6 @@ public class PanierServlet extends HttpServlet {
                         }
                         request.getRequestDispatcher("/WEB-INF/views/panier.jsp").forward(request, response);
                         return;
-                    default:
-                        System.out.println("Unknown panier action: " + action);
-                        break;
                 }
             }
             response.sendRedirect(request.getContextPath() + "/panier?action=view");
