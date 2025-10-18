@@ -8,7 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import ma.fstt.atelierecommerce.Model.Commande;
 import ma.fstt.atelierecommerce.Model.User;
-import ma.fstt.atelierecommerce.util.JPAUtil;
+import ma.fstt.atelierecommerce.utils.JPAUtil;
 
 import jakarta.persistence.EntityManager;
 import java.io.IOException;

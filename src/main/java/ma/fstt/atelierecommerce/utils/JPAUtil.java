@@ -1,4 +1,4 @@
-package ma.fstt.atelierecommerce.util;
+package ma.fstt.atelierecommerce.utils;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;

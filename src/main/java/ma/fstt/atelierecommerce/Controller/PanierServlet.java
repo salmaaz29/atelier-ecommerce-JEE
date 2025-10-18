@@ -12,7 +12,7 @@ import ma.fstt.atelierecommerce.Model.LignePanier;
 import ma.fstt.atelierecommerce.Model.Panier;
 import ma.fstt.atelierecommerce.Model.Produit;
 import ma.fstt.atelierecommerce.Model.User;
-import ma.fstt.atelierecommerce.util.JPAUtil;
+import ma.fstt.atelierecommerce.utils.JPAUtil;
 
 import jakarta.persistence.EntityManager;
 import java.io.IOException;
