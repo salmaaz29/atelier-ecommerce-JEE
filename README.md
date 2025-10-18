@@ -43,7 +43,7 @@ User ──1:1── Panier ──1:N── LignePanier ──N:1── Produit
 **1. Cloner le projet**
 ```bash
 git clone https://github.com/salmaaz29/atelier-ecommerce-JEE.git
-atelier-ecommerce-JEE
+cd atelier-ecommerce-JEE
 ```
 
 **2. Créer la base de données**
